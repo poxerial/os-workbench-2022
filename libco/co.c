@@ -17,7 +17,7 @@ struct co
   // ensure 16-byte aligned
   uint8_t stack[STACK_SIZE];
 
-  char *name;
+  const char *name;
   void (*func)(void *);
   void *arg;
 
