@@ -61,7 +61,7 @@ void randjmp()
   if (ne->status == CO_NEW)
   {
     ne->status = CO_HAS_RUN;
-    stack_switch_call(ne->stack, ne->func, ne->arg);
+    stack_switch_call(ne->stack, ne->func, (uintptr_t)ne->arg);
   }
   else
   {
@@ -92,7 +92,7 @@ void co_wait(struct co *co)
   {
     current = top;
     top->status = CO_HAS_RUN;
-    stack_switch_call(top->stack, top->func, top->arg);
+    stack_switch_call(top->stack, top->func, (uintptr_t)top->arg);
   }
 }
 
