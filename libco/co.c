@@ -26,10 +26,10 @@ struct co
   jmp_buf context;
 };
 
-struct co *top;
-struct co *current;
-size_t co_num = 0;
-size_t wait_num = 0;
+volatile struct co *top;
+volatile struct co *current;
+volatile size_t co_num = 0;
+volatile size_t wait_num = 0;
 
 static inline void stack_switch_call(void *sp, void *entry, uintptr_t arg)
 {
@@ -50,9 +50,11 @@ static inline void stack_switch_call(void *sp, void *entry, uintptr_t arg)
 
 void randjmp()
 {
+  if (co_num == 0)
+    return;
   int r = rand();
   struct co *ne = top;
-  for (r %= co_num; r > 0; r--)
+  for (r %= wait_num; r > 0; r--)
   {
     ne = ne->next;
   }
@@ -65,7 +67,7 @@ void randjmp()
   }
   else
   {
-    longjmp(ne->context, 0);
+    longjmp(ne->context, 1);
   }
 }
 struct co *co_start(const char *_name, void (*_func)(void *), void *_arg)
@@ -93,12 +95,23 @@ void co_wait(struct co *co)
     current = top;
     top->status = CO_HAS_RUN;
     stack_switch_call(top->stack, top->func, (uintptr_t)top->arg);
+    wait_num--;
+    free(current);
+    current = NULL;
+    if (wait_num)
+    {
+      randjmp();
+    }
   }
+  co_num = wait_num = 0;
 }
 
 void co_yield()
 {
-  setjmp(current->context);
+  if(setjmp(current->context) == 0)
+  {
 
+  }
+  
   randjmp();
 }
