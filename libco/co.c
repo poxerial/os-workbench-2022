@@ -31,6 +31,13 @@ static struct co *current;
 static size_t co_num = 0;
 static size_t wait_num = 0;
 
+static inline void stack_switch_call(void *sp, void *entry, uintptr_t arg);
+static void randjmp();
+void entry(void *args);
+struct co *co_start(const char *_name, void (*_func)(void *), void *_arg);
+void co_wait(struct co *co);
+void co_yield();
+
 static inline void stack_switch_call(void *sp, void *entry, uintptr_t arg)
 {
   asm volatile(
