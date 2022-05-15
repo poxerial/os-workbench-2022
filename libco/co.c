@@ -80,7 +80,7 @@ struct co *co_start(const char *_name, void (*_func)(void *), void *_arg)
   c->arg = _arg;
   c->status = CO_NEW;
   if (top)
-    c->next = top;
+    c->next = (struct co*) top;
   else
     c->next = NULL;
   top = c;
@@ -95,7 +95,7 @@ void co_wait(struct co *co)
   {
     current = top;
     top->status = CO_HAS_RUN;
-    stack_switch_call(top->stack, top->func, (uintptr_t)top->arg);
+    stack_switch_call((void *)top->stack, top->func, (uintptr_t)top->arg);
     wait_num--;
     free(current);
     current = NULL;
