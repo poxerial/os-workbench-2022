@@ -85,10 +85,9 @@ void entry(void *args)
   struct co *c = (struct co *)args;
 #if __x86_64__
   asm volatile (
-    "push %%rbp;"
-    "movq %%rbp, %%rsp;"
-    "and %%rsp, %0xFFFFFFFFFFFFFFF0;"
-    :::
+    "push %rbp;"
+    "movq %rbp, %rsp;"
+    "and %rsp, 0xFFFFFFFFFFFFFFF0;"
     );
 #endif
   c->func(c->arg);
