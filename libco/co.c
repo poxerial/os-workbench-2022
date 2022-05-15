@@ -84,7 +84,7 @@ void entry(void *args)
 {
   struct co *c = (struct co *)args;
 #if __x86_64__
-  asm volatile ("and %rsp, 0xffffffffffffffff");
+  asm volatile ("and %rsp, 0xFFFFFFFFFFFFFFF0");
 #endif
   c->func(c->arg);
   wait_num--;
