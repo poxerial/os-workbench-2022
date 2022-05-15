@@ -25,11 +25,11 @@ struct co
   jmp_buf context;
 };
 
-static volatile jmp_buf local_buf;
-static volatile struct co *top;
-static volatile struct co *current;
-static volatile size_t co_num = 0;
-static volatile size_t wait_num = 0;
+static jmp_buf local_buf;
+static struct co *top;
+static struct co *current;
+static size_t co_num = 0;
+static size_t wait_num = 0;
 
 static inline void stack_switch_call(void *sp, void *entry, uintptr_t arg)
 {
