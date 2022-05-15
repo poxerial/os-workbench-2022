@@ -122,10 +122,7 @@ void co_wait(struct co *co)
 
   if (co_num > 0 && co_num == wait_num)
   {
-    current = top;
-    top->status = CO_HAS_RUN;
-    if (!setjmp(local_buf))
-      stack_switch_call((void *)top->stack, top->func, (uintptr_t)top->arg);
+    randjmp(); 
   }
 }
 
