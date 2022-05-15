@@ -48,20 +48,6 @@ static inline void stack_switch_call(void *sp, void *entry, uintptr_t arg)
   );
 }
 
-void entry(void *args)
-{
-  struct co *c = (struct co *)args;
-  c->func(c->arg);
-  wait_num--;
-  free((void *)current);
-  current = NULL;
-  if (wait_num)
-  {
-    randjmp();
-  }
-  longjmp(local_buf, 1);
-}
-
 static void randjmp()
 {
   if (co_num == 0)
@@ -83,6 +69,20 @@ static void randjmp()
   {
     longjmp(ne->context, 1);
   }
+}
+
+void entry(void *args)
+{
+  struct co *c = (struct co *)args;
+  c->func(c->arg);
+  wait_num--;
+  free((void *)current);
+  current = NULL;
+  if (wait_num)
+  {
+    randjmp();
+  }
+  longjmp(local_buf, 1);
 }
 
 struct co *co_start(const char *_name, void (*_func)(void *), void *_arg)
