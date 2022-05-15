@@ -102,7 +102,7 @@ struct co *co_start(const char *_name, void (*_func)(void *), void *_arg)
     printf("memory alloc error!\n");
     return NULL;
   }
-  printf("The address of stack: %x\n", c->stack);
+  printf("The address of stack: %p\n", c->stack);
   co_num++;
   c->name = _name;
   c->func = _func;
