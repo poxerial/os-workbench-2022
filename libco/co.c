@@ -5,7 +5,8 @@
 
 #define STACK_SIZE 1 << 16
 
-enum co_status {
+enum co_status
+{
   CO_NEW = 1,
   CO_HAS_RUN,
 };
@@ -24,10 +25,11 @@ struct co
   jmp_buf context;
 };
 
-volatile struct co *top;
-volatile struct co *current;
-volatile size_t co_num = 0;
-volatile size_t wait_num = 0;
+static volatile jmp_buf local_buf;
+static volatile struct co *top;
+static volatile struct co *current;
+static volatile size_t co_num = 0;
+static volatile size_t wait_num = 0;
 
 static inline void stack_switch_call(void *sp, void *entry, uintptr_t arg)
 {
@@ -46,22 +48,36 @@ static inline void stack_switch_call(void *sp, void *entry, uintptr_t arg)
   );
 }
 
+void entry(void *args)
+{
+  struct co *c = (struct co *)args;
+  c->func(c->arg);
+  wait_num--;
+  free((void *)current);
+  current = NULL;
+  if (wait_num)
+  {
+    randjmp();
+  }
+  longjmp(local_buf, 1);
+}
+
 static void randjmp()
 {
   if (co_num == 0)
     return;
   int r = rand();
-  struct co *ne = (struct co*)top;
+  struct co *ne = (struct co *)top;
   for (r %= wait_num; r > 0; r--)
   {
     ne = ne->next;
   }
-  
+
   current = ne;
   if (ne->status == CO_NEW)
   {
     ne->status = CO_HAS_RUN;
-    stack_switch_call(ne->stack, ne->func, (uintptr_t)ne->arg);
+    stack_switch_call(ne->stack, entry, (uintptr_t)ne);
   }
   else
   {
@@ -80,7 +96,7 @@ struct co *co_start(const char *_name, void (*_func)(void *), void *_arg)
   c->arg = _arg;
   c->status = CO_NEW;
   if (top)
-    c->next = (struct co*) top;
+    c->next = (struct co *)top;
   else
     c->next = NULL;
   top = c;
@@ -95,28 +111,13 @@ void co_wait(struct co *co)
   {
     current = top;
     top->status = CO_HAS_RUN;
-    stack_switch_call((void *)top->stack, top->func, (uintptr_t)top->arg);
-    wait_num--;
-    free((void *)current);
-    current = NULL;
-    if (wait_num)
-    {
-      randjmp();
-    }
+    if (!setjmp(local_buf))
+      stack_switch_call((void *)top->stack, top->func, (uintptr_t)top->arg);
   }
 }
 
 void co_yield()
 {
-  if(setjmp(((struct co*)current)->context) == 0)
-  {
-
-  }
-  else
-  {
-
-  }
-
-  
+  setjmp(current->context);
   randjmp();
 }
