@@ -96,7 +96,10 @@ struct co *co_start(const char *_name, void (*_func)(void *), void *_arg)
 {
   struct co *c = (struct co *)malloc(sizeof(struct co));
   if (c == NULL)
+  {
+    printf("memory alloc error!\n");
     return NULL;
+  }
   co_num++;
   c->name = _name;
   c->func = _func;
