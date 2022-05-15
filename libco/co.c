@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <setjmp.h>
 
-#define STACK_SIZE 1 << 16
+#define STACK_SIZE 1 << 12
 
 enum co_status
 {
