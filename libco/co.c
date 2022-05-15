@@ -83,6 +83,7 @@ static void randjmp()
 void entry(void *args)
 {
   struct co *c = (struct co *)args;
+  asm volatile ("subq %%rsp, %8;");
   c->func(c->arg);
   wait_num--;
   free((void *)current);
