@@ -97,7 +97,7 @@ void co_wait(struct co *co)
     top->status = CO_HAS_RUN;
     stack_switch_call((void *)top->stack, top->func, (uintptr_t)top->arg);
     wait_num--;
-    free(current);
+    free((void *)current);
     current = NULL;
     if (wait_num)
     {
@@ -108,7 +108,7 @@ void co_wait(struct co *co)
 
 void co_yield()
 {
-  if(setjmp(current->context) == 0)
+  if(setjmp((struct co*)current->context) == 0)
   {
 
   }
