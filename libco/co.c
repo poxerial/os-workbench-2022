@@ -108,7 +108,7 @@ void co_wait(struct co *co)
 
 void co_yield()
 {
-  if(setjmp((struct co*)current->context) == 0)
+  if(setjmp(((struct co*)current)->context) == 0)
   {
 
   }
