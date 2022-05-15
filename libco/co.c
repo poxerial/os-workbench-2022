@@ -5,8 +5,6 @@
 
 #define STACK_SIZE 1 << 16
 
-
-
 enum co_status {
   CO_NEW = 1,
   CO_HAS_RUN,
@@ -48,12 +46,12 @@ static inline void stack_switch_call(void *sp, void *entry, uintptr_t arg)
   );
 }
 
-void randjmp()
+static void randjmp()
 {
   if (co_num == 0)
     return;
   int r = rand();
-  struct co *ne = top;
+  struct co *ne = (struct co*)top;
   for (r %= wait_num; r > 0; r--)
   {
     ne = ne->next;
@@ -70,6 +68,7 @@ void randjmp()
     longjmp(ne->context, 1);
   }
 }
+
 struct co *co_start(const char *_name, void (*_func)(void *), void *_arg)
 {
   struct co *c = (struct co *)malloc(sizeof(struct co));
@@ -82,6 +81,8 @@ struct co *co_start(const char *_name, void (*_func)(void *), void *_arg)
   c->status = CO_NEW;
   if (top)
     c->next = top;
+  else
+    c->next = NULL;
   top = c;
   return c;
 }
@@ -103,7 +104,6 @@ void co_wait(struct co *co)
       randjmp();
     }
   }
-  co_num = wait_num = 0;
 }
 
 void co_yield()
@@ -112,6 +112,11 @@ void co_yield()
   {
 
   }
+  else
+  {
+
+  }
+
   
   randjmp();
 }
