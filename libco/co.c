@@ -114,7 +114,7 @@ void co_wait(struct co *co)
 {
   wait_num++;
 
-  if (co_num == wait_num)
+  if (co_num > 0 && co_num == wait_num)
   {
     current = top;
     top->status = CO_HAS_RUN;
