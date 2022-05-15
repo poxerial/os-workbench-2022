@@ -5,7 +5,7 @@
 
 #include "co.h"
 
-#define STACK_SIZE 1 << 12
+#define STACK_SIZE 1 << 16
 
 enum co_status
 {
@@ -102,6 +102,7 @@ struct co *co_start(const char *_name, void (*_func)(void *), void *_arg)
     printf("memory alloc error!\n");
     return NULL;
   }
+  printf("The address of stack: %x\n", c->stack);
   co_num++;
   c->name = _name;
   c->func = _func;
