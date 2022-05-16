@@ -15,7 +15,6 @@ enum co_status
 
 struct co
 {
-  // ensure 16-byte aligned
   uint8_t stack[STACK_SIZE];
 
   const char *name;
@@ -85,8 +84,6 @@ void entry(void *args)
   struct co *c = (struct co *)args;
 #if __x86_64__
   asm volatile (
-    "push %rbp;"
-    "movq %rbp, %rsp;"
     "and %rsp, 0xFFFFFFFFFFFFFFF0;"
     );
 #endif
@@ -104,6 +101,8 @@ void entry(void *args)
 struct co *co_start(const char *_name, void (*_func)(void *), void *_arg)
 {
   struct co *c = (struct co *)malloc(sizeof(struct co));
+  //the %rsp should  point to top of the stack
+  ++c; 
   if (c == NULL)
   {
     printf("memory alloc error!\n");
