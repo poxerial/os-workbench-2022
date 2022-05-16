@@ -83,9 +83,8 @@ void entry(void *args)
 {
   struct co *c = (struct co *)args;
 #if __x86_64__
-  asm volatile (
-    "and %rsp, 0xFFFFFFFFFFFFFFF0;"
-    );
+  asm volatile(
+      "and %rsp, 0xFFFFFFFFFFFFFFF0;");
 #endif
   c->func(c->arg);
   wait_num--;
@@ -101,13 +100,14 @@ void entry(void *args)
 struct co *co_start(const char *_name, void (*_func)(void *), void *_arg)
 {
   struct co *c = (struct co *)malloc(sizeof(struct co));
-  //the %rsp should  point to top of the stack
-  ++c; 
+  
   if (c == NULL)
   {
     printf("memory alloc error!\n");
     return NULL;
   }
+  // the %rsp should  point to top of the stack
+  c->stack += STACK_SIZE;
   printf("The address of stack: %p\n", c->stack);
   co_num++;
   c->name = _name;
@@ -128,7 +128,7 @@ void co_wait(struct co *co)
 
   if (co_num > 0 && co_num == wait_num)
   {
-    randjmp(); 
+    randjmp();
   }
 }
 
