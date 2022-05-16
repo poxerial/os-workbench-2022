@@ -71,7 +71,7 @@ static void randjmp()
   if (ne->status == CO_NEW)
   {
     ne->status = CO_HAS_RUN;
-    stack_switch_call(ne->stack, entry, (uintptr_t)ne);
+    stack_switch_call(&ne->stack[STACK_SIZE], entry, (uintptr_t)ne);
   }
   else
   {
@@ -106,8 +106,6 @@ struct co *co_start(const char *_name, void (*_func)(void *), void *_arg)
     printf("memory alloc error!\n");
     return NULL;
   }
-  // the %rsp should  point to top of the stack
-  c->stack += STACK_SIZE;
   printf("The address of stack: %p\n", c->stack);
   co_num++;
   c->name = _name;
