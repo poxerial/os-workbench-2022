@@ -71,6 +71,7 @@ static void randjmp()
   if (ne->status == CO_NEW)
   {
     ne->status = CO_HAS_RUN;
+    //%rsp should be on the top of the stack
     stack_switch_call(&ne->stack[STACK_SIZE], entry, (uintptr_t)ne);
   }
   else
@@ -83,8 +84,7 @@ void entry(void *args)
 {
   struct co *c = (struct co *)args;
 #if __x86_64__
-  asm volatile(
-      "and %rsp, 0xFFFFFFFFFFFFFFF0;");
+  asm volatile("and %rsp, 0xFFFFFFFFFFFFFFF0;");
 #endif
   c->func(c->arg);
   wait_num--;
