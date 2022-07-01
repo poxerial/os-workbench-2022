@@ -1,11 +1,121 @@
-#include <stdio.h>
 #include <assert.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include <dirent.h>
+#include <sys/types.h>
+#include <unistd.h>
+
+#define MAX_PROCS 512
+#define PROC_PATH "/proc"
+#define MAX_PROC_CHILDS_NUM 32
+#define MAX_PATH_LEN 128
+#define MESSAGE_MAX_SIZE 2048
+
+#define UTF_V "\342\224\202"  /* U+2502, Vertical line drawing char */
+#define UTF_VR "\342\224\234" /* U+251C, Vertical and right */
+#define UTF_H "\342\224\200"  /* U+2500, Horizontal */
+#define UTF_UR "\342\224\224" /* U+2514, Up and right */
+#define UTF_HD "\342\224\254" /* U+252C, Horizontal and down */
+
+typedef struct process_t process;
+struct process_t {
+  int pid;
+  char comm[256];
+  int ppid;
+  process *child_procs[MAX_PROC_CHILDS_NUM];
+  int child_num;
+};
+
+const char usage[] =
+    "usage:\n-p, --show-pids: 打印每个进程的进程号。\n"
+    "-n --numeric-sort: 按照pid的数值从小到大顺序输出一个进程的直接孩子。\n"
+    "-V --version: 打印版本信息\n";
+
+int is_sort;
+int is_print_pid;
+process procs[MAX_PROCS];
+size_t proc_num;
+
+int proc_comp(process **a, process **b) { return a[0]->pid <= b[0]->pid; }
+
+void readProcess() {
+  struct dirent *file = NULL;
+  DIR *dir = opendir(PROC_PATH);
+  while (NULL != (file = readdir(dir))) {
+    if (file->d_name[0] < '0' || file->d_name[0] > '9')
+      continue;
+    char path[MAX_PATH_LEN];
+    sprintf(path, "%s/%s/stat", PROC_PATH, file->d_name);
+    FILE *stat = fopen(path, "r");
+    char temp;
+    fscanf(stat, "%d %s %c %d", &procs[proc_num].pid, procs[proc_num].comm,
+           &temp, &procs[proc_num].ppid);
+    proc_num++;
+  }
+}
+
+process *createTree() {
+  process *root;
+  int parent_pid = 0;
+  for (int proc_iter_num = 0; proc_iter_num < proc_num;) {
+    assert(procs[proc_iter_num].child_num < MAX_PROC_CHILDS_NUM);
+    int is_all_child_linked = 1;
+    for (int i = 0; i < proc_num; i++) {
+      if (procs[i].ppid == parent_pid) {
+        is_all_child_linked = 0;
+        size_t child_num = procs[proc_iter_num].child_num;
+        procs[proc_iter_num].child_procs[child_num++] = &procs[i];
+      }
+    }
+
+    if (is_all_child_linked) {
+      if (is_sort)
+        qsort(procs[proc_iter_num].child_procs, sizeof(process *),
+              procs[proc_iter_num].child_num * sizeof(process *), proc_comp);
+      proc_iter_num++;
+    }
+  }
+  return root;
+}
+
+char *add_n_space(char *dest, int n) {
+  char *end = dest + n;
+  for (; dest != end; dest++)
+    *dest = ' ';
+  return end;
+}
+
+void print_leaf(process *path, int depth)
+{
+  for (int i = depth - 1; i > 0; i++)
+  {
+
+    
+  }
+}
 
 int main(int argc, char *argv[]) {
+  if (argc == 0) {
+    printf("%s", usage);
+  }
   for (int i = 0; i < argc; i++) {
     assert(argv[i]);
     printf("argv[%d] = %s\n", i, argv[i]);
+    if (strcmp(argv[i], "-V")) {
+      printf("pstree from os-workbench-2022, version 0.0.1");
+      break;
+    }
+    if (strcmp(argv[i], "-p") || strcmp(argv[i], "--show-pids"))
+      is_print_pid = 1;
+    if (strcmp(argv[i], "-n") || strcmp(argv[i], "--numeric-sort"))
+      is_sort = 1;
   }
   assert(!argv[argc]);
+  char fst_tree_message[MESSAGE_MAX_SIZE];
+  char snd_tree_message[MESSAGE_MAX_SIZE];
+  readProcess();
+  process *root = createTree();
   return 0;
 }
