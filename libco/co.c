@@ -2,10 +2,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <setjmp.h>
+#include <assert.h>
 
 #include "co.h"
 
-#define STACK_SIZE 1 << 16
+#define STACK_SIZE (1 << 16)
 
 enum co_status
 {
@@ -15,6 +16,7 @@ enum co_status
 
 struct co
 {
+  // ensure 16-byte aligned
   uint8_t stack[STACK_SIZE];
 
   const char *name;
@@ -28,16 +30,17 @@ struct co
 
 static jmp_buf local_buf;
 static struct co *top;
+static struct co *tobedel;
 static struct co *current;
-static size_t co_num = 0;
-static size_t wait_num = 0;
+static size_t co_num;
 
 static inline void stack_switch_call(void *sp, void *entry, uintptr_t arg);
 static void randjmp();
 void entry(void *args);
 struct co *co_start(const char *_name, void (*_func)(void *), void *_arg);
 void co_wait(struct co *co);
-void co_yield();
+void co_yield ();
+int co_free(struct co *);
 
 static inline void stack_switch_call(void *sp, void *entry, uintptr_t arg)
 {
@@ -56,23 +59,50 @@ static inline void stack_switch_call(void *sp, void *entry, uintptr_t arg)
   );
 }
 
+int co_free(struct co *co)
+{
+  struct co *c;
+  int is_deleted = 0;
+  if (tobedel->next == NULL || tobedel == co)
+  {
+    assert(tobedel == co);
+    tobedel = tobedel->next;
+    is_deleted = 1;
+  }
+  else
+  {
+    for (c = tobedel; c->next != NULL; c = c->next)
+    {
+      if (c->next == co)
+      {
+        c->next = c->next->next;
+        is_deleted = 1;
+        break;
+      }
+    }
+  }
+  assert(is_deleted);
+  free((void *)co);
+  return is_deleted;
+}
+
 static void randjmp()
 {
   if (co_num == 0)
     return;
   int r = rand();
   struct co *ne = (struct co *)top;
-  for (r %= wait_num; r > 0; r--)
+  for (r %= co_num; r > 0; r--)
   {
     ne = ne->next;
   }
+  assert(ne != NULL);
 
   current = ne;
   if (ne->status == CO_NEW)
   {
     ne->status = CO_HAS_RUN;
-    //%rsp should be on the top of the stack
-    stack_switch_call(&ne->stack[STACK_SIZE], entry, (uintptr_t)ne);
+    stack_switch_call(ne->stack + STACK_SIZE - 8, entry, (uintptr_t)ne);
   }
   else
   {
@@ -83,30 +113,43 @@ static void randjmp()
 void entry(void *args)
 {
   struct co *c = (struct co *)args;
-#if __x86_64__
-  asm volatile("and %rsp, 0xFFFFFFFFFFFFFFF0;");
-#endif
   c->func(c->arg);
-  wait_num--;
-  free((void *)current);
-  current = NULL;
-  if (wait_num)
+
+  int is_move_to_tobedel = 0;
+  current->status = CO_HAS_RUN;
+  if (top == current)
   {
-    randjmp();
+    top = top->next;
+    current->next = tobedel;
+    tobedel = current;
+    is_move_to_tobedel = 1;
   }
+  else
+  {
+    for (c = top; c->next != NULL; c = c->next)
+    {
+      if (c->next == current)
+      {
+        c->next = c->next->next;
+        current->next = tobedel;
+        tobedel = current;
+        is_move_to_tobedel = 1;
+        break;
+      }
+    }
+  }
+  assert(is_move_to_tobedel);
+  current = NULL;
+
+  co_num--;
+
   longjmp(local_buf, 1);
 }
 
 struct co *co_start(const char *_name, void (*_func)(void *), void *_arg)
 {
   struct co *c = (struct co *)malloc(sizeof(struct co));
-  
-  if (c == NULL)
-  {
-    printf("memory alloc error!\n");
-    return NULL;
-  }
-  printf("The address of stack: %p\n", c->stack);
+  assert(c);
   co_num++;
   c->name = _name;
   c->func = _func;
@@ -122,16 +165,27 @@ struct co *co_start(const char *_name, void (*_func)(void *), void *_arg)
 
 void co_wait(struct co *co)
 {
-  wait_num++;
+  struct co *c;
 
-  if (co_num > 0 && co_num == wait_num)
+  for (c = tobedel; c; c = c->next)
+  {
+    if (c == co)
+    {
+      co_free(co);
+      return;
+    }
+  }
+
+  if (setjmp(local_buf) == 0)
   {
     randjmp();
   }
+  
+  co_wait(co);
 }
 
-void co_yield()
+void co_yield ()
 {
-  setjmp(current->context);
-  randjmp();
+  if (setjmp(current->context) == 0)
+    randjmp();
 }
