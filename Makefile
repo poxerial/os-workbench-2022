@@ -16,16 +16,16 @@ CFLAGS += -O1 -std=gnu11 -ggdb -Wall -Werror -Wno-unused-result -Wno-unused-valu
 commit-and-make: git all
 
 $(NAME)-64: $(DEPS) # 64bit binary
-	gcc -m64 $(CFLAGS) $(SRCS) -o $@ $(LDFLAGS)
+	$(CC) -m64 $(CFLAGS) $(SRCS) -o $@ $(LDFLAGS)
 
 $(NAME)-32: $(DEPS) # 32bit binary
-	gcc -m32 $(CFLAGS) $(SRCS) -o $@ $(LDFLAGS)
+	$(CC) -m32 $(CFLAGS) $(SRCS) -o $@ $(LDFLAGS)
  
 $(NAME)-64.so: $(DEPS) # 64bit shared library
-	gcc -fPIC -shared -m64 $(CFLAGS) $(SRCS) -o $@ $(LDFLAGS)
+	$(CC) -fPIC -shared -m64 $(CFLAGS) $(SRCS) -o $@ $(LDFLAGS)
 
 $(NAME)-32.so: $(DEPS) # 32bit shared library
-	gcc -fPIC -shared -m32 $(CFLAGS) $(SRCS) -o $@ $(LDFLAGS)
+	$(CC) -fPIC -shared -m32 $(CFLAGS) $(SRCS) -o $@ $(LDFLAGS)
 
 clean:
 	rm -f $(NAME)-64 $(NAME)-32 $(NAME)-64.so $(NAME)-32.so
