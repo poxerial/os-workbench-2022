@@ -1,8 +1,8 @@
 #include <assert.h>
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <limits.h>
 
 #include <dirent.h>
 #include <sys/types.h>
@@ -39,7 +39,9 @@ int is_print_pid;
 process procs[MAX_PROCS];
 size_t proc_num;
 
-int proc_comp(const void *a, const void *b) { return ((process **)a)[0]->pid <= ((process **)b)[0]->pid; }
+int proc_comp(const void *a, const void *b) {
+  return ((process *)a)->pid < ((process *)b)->pid;
+}
 
 void readProcess() {
   struct dirent *file = NULL;
@@ -108,8 +110,7 @@ void print_tree(char *forward, char *forward_end, process *root) {
     printf("   ");
     forward_end = add_n_space(forward_end, strlen(root->comm + 3));
     print_tree(forward, forward_end, root->child_procs[0]);
-    for (int i = 1; i < root->child_num; i++)
-    {
+    for (int i = 1; i < root->child_num; i++) {
       print_tree(forward, forward_end, root->child_procs[i]);
     }
   }
