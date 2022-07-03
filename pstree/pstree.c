@@ -118,13 +118,13 @@ void print_tree(char *forward, char *forward_end, process *root) {
 int main(int argc, char *argv[]) {
   for (int i = 0; i < argc; i++) {
     assert(argv[i]);
-    if (strcmp(argv[i], "-V")) {
+    if (strcmp(argv[i], "-V") == 0) {
       printf("pstree from os-workbench-2022, version 0.0.1");
       break;
     }
-    if (strcmp(argv[i], "-p") || strcmp(argv[i], "--show-pids"))
+    if (strcmp(argv[i], "-p") == 0 || strcmp(argv[i], "--show-pids"))
       is_print_pid = 1;
-    if (strcmp(argv[i], "-n") || strcmp(argv[i], "--numeric-sort"))
+    if (strcmp(argv[i], "-n") == 0 || strcmp(argv[i], "--numeric-sort"))
       is_sort = 1;
   }
   assert(!argv[argc]);
