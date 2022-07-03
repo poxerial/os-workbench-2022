@@ -59,7 +59,8 @@ void readProcess() {
   }
 }
 
-process *createTree(process *root) {
+process *createTree() {
+  process *root = NULL;
   int parent_pid = 0;
   for (int proc_iter_index = 0; proc_iter_index < proc_num;) {
     assert(procs[proc_iter_index].child_num < MAX_PROC_CHILDS_NUM);
@@ -77,6 +78,8 @@ process *createTree(process *root) {
       if (is_sort)
         qsort(procs[proc_iter_index].child_procs, sizeof(process *),
               procs[proc_iter_index].child_num * sizeof(process *), proc_comp);
+      if (procs[proc_iter_index].pid == 1)
+        root = &procs[proc_iter_index];
       parent_pid = procs[proc_iter_index].pid;
       proc_iter_index++;
     }
@@ -128,8 +131,7 @@ int main(int argc, char *argv[]) {
   char fst_tree_message[MESSAGE_MAX_SIZE];
   char snd_tree_message[MESSAGE_MAX_SIZE];
   readProcess();
-  process *root;
-  createTree(root);
+  process *root = createTree();
   char line_buff[MESSAGE_MAX_SIZE];
   print_tree(line_buff, line_buff, root);
   return 0;
