@@ -12,7 +12,7 @@
 #define PROC_PATH "/proc"
 #define MAX_PROC_CHILDS_NUM 32
 #define MAX_PATH_LEN 512
-#define MESSAGE_MAX_SIZE 2048
+#define MESSAGE_MAX_SIZE 256
 
 #define UTF_V "\342\224\202"  /* U+2502, Vertical line drawing char */
 #define UTF_VR "\342\224\234" /* U+251C, Vertical and right */
@@ -59,8 +59,7 @@ void readProcess() {
   }
 }
 
-process *createTree() {
-  process *root;
+process *createTree(process *root) {
   int parent_pid = 0;
   for (int proc_iter_index = 0; proc_iter_index < proc_num;) {
     assert(procs[proc_iter_index].child_num < MAX_PROC_CHILDS_NUM);
@@ -129,6 +128,9 @@ int main(int argc, char *argv[]) {
   char fst_tree_message[MESSAGE_MAX_SIZE];
   char snd_tree_message[MESSAGE_MAX_SIZE];
   readProcess();
-  process *root = createTree();
+  process *root;
+  createTree(root);
+  char line_buff[MESSAGE_MAX_SIZE];
+  print_tree(line_buff, line_buff, root);
   return 0;
 }
