@@ -155,7 +155,7 @@ void print_tree(char *forward, char *forward_end, process *root) {
     }
     printf(" " UTF_UR UTF_H);
     forward_end_child -= add_space_len + strlen(" " UTF_V " ");
-    add_space_len = print_node(root->child_procs[root->child_num - 1]);
+    add_space_len = 3 + print_node(root->child_procs[root->child_num - 1]);
     forward_end_child = add_n_space(forward_end_child, add_space_len);
     print_tree(forward, forward_end_child,
                root->child_procs[root->child_num - 1]);
