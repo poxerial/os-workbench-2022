@@ -20,38 +20,20 @@
 #define UTF_UR "\342\224\224" /* U+2514, Up and right */
 #define UTF_HD "\342\224\254" /* U+252C, Horizontal and down */
 
-typedef struct process_t process;
+typedef 
 struct process_t {
   int pid;
   char comm[256];
   int ppid;
   process *child_procs[MAX_PROC_CHILDS_NUM];
   int child_num;
-};
+} process;
 
 int is_sort;
 int is_print_pid;
 process procs[MAX_PROCS];
 size_t proc_num;
 int is_print_forward;
-
-void print_forward(char *forward, char *forward_end) {
-  if (is_print_forward) {
-    char forward_[MESSAGE_MAX_SIZE];
-    strcpy(forward_, forward);
-    forward_[forward_end - forward] = '\0';
-    printf("%s", forward_);
-    is_print_forward = 0;
-  }
-}
-
-int proc_comp(const void *a, const void *b) {
-  return ((process **)a)[0]->pid >= ((process **)b)[0]->pid ? 1 : 0;
-}
-
-int proc_comp_default(const void *a, const void *b) {
-  return strcmp(((process **)a)[0]->comm, ((process **)b)[0]->comm);
-}
 
 void read_process() {
   struct dirent *file = NULL;
@@ -70,6 +52,15 @@ void read_process() {
     proc_num++;
   }
   closedir(dir);
+}
+
+
+int proc_comp(const void *a, const void *b) {
+  return ((process **)a)[0]->pid >= ((process **)b)[0]->pid ? 1 : 0;
+}
+
+int proc_comp_default(const void *a, const void *b) {
+  return strcmp(((process **)a)[0]->comm, ((process **)b)[0]->comm);
 }
 
 process *create_tree() {
@@ -106,6 +97,7 @@ process *create_tree() {
   return root;
 }
 
+
 char *add_n_space(char *dest, int n) {
   char *end = dest + n;
   for (; dest != end; dest++)
@@ -122,6 +114,16 @@ int print_node(process *node) {
   } else {
     printf("%s", node->comm);
     return strlen(node->comm);
+  }
+}
+
+void print_forward(char *forward, char *forward_end) {
+  if (is_print_forward) {
+    char forward_[MESSAGE_MAX_SIZE];
+    strcpy(forward_, forward);
+    forward_[forward_end - forward] = '\0';
+    printf("%s", forward_);
+    is_print_forward = 0;
   }
 }
 
@@ -159,6 +161,7 @@ void print_tree(char *forward, char *forward_end, process *root) {
     is_print_forward = 1;
   }
 }
+
 
 int main(int argc, char *argv[]) {
   for (int i = 0; i < argc; i++) {
