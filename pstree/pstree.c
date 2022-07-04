@@ -41,7 +41,7 @@ process procs[MAX_PROCS];
 size_t proc_num;
 
 int proc_comp(const void *a, const void *b) {
-  return ((process **)a)[0]->pid < ((process **)b)[0]->pid;
+  return ((process **)a)[0]->pid < ((process **)b)[0]->pid ? 1 : 0;
 }
 
 void readProcess() {
