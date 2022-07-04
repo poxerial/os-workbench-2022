@@ -44,6 +44,11 @@ int proc_comp(const void *a, const void *b) {
   return ((process **)a)[0]->pid >= ((process **)b)[0]->pid ? 1 : 0;
 }
 
+int proc_comp_default(const void *a, const void *b)
+{
+  return ((process **)a)[0]->comm[0] >= ((process **)b)[0]->comm[0] ? 1 : 0;
+}
+
 void readProcess() {
   struct dirent *file = NULL;
   DIR *dir = opendir(PROC_PATH);
@@ -83,6 +88,10 @@ process *createTree() {
       if (is_sort)
         qsort(procs[proc_iter_index].child_procs, procs[proc_iter_index].child_num,
               sizeof(process *), proc_comp);
+      else
+        qsort(procs[proc_iter_index].child_procs, procs[proc_iter_index].child_num,
+              sizeof(process *), proc_comp_default);
+
       if (procs[proc_iter_index].pid == 1)
         root = &procs[proc_iter_index];
       proc_iter_index++;
