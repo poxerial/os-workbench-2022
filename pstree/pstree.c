@@ -130,7 +130,7 @@ void print_tree(char *forward, char *forward_end, process *root) {
     char *forward_end_child = forward_end + sprintf(forward_end, " " UTF_V " ");
     int add_space_len = print_node(root->child_procs[0]);
     forward_end_child = add_n_space(forward_end_child, add_space_len);
-    print_tree(forward, forward_end, root->child_procs[0]);
+    print_tree(forward, forward_end_child, root->child_procs[0]);
 
     for (int i = 1; i < root->child_num - 1; i++) {
       if (is_print_forward) {
