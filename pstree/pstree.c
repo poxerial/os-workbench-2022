@@ -12,13 +12,14 @@
 #define PROC_PATH "/proc"
 #define MAX_PROC_CHILDS_NUM 32
 #define MAX_PATH_LEN 512
-#define MESSAGE_MAX_SIZE 256
+#define MESSAGE_MAX_SIZE 512
 
 #define UTF_V "\342\224\202"  /* U+2502, Vertical line drawing char */
 #define UTF_VR "\342\224\234" /* U+251C, Vertical and right */
 #define UTF_H "\342\224\200"  /* U+2500, Horizontal */
 #define UTF_UR "\342\224\224" /* U+2514, Up and right */
 #define UTF_HD "\342\224\254" /* U+252C, Horizontal and down */
+// UTF_V│UTF_VR├UTF_H─UTF_UR└UTF_HD┬
 
 typedef struct process_t process;
 struct process_t {
@@ -59,6 +60,7 @@ void readProcess() {
            &temp, &procs[proc_num].ppid);
     proc_num++;
   }
+  closedir(dir);
 }
 
 process *createTree() {
@@ -72,6 +74,7 @@ process *createTree() {
         is_all_child_linked = 0;
         size_t child_num = procs[proc_iter_index].child_num;
         procs[proc_iter_index].child_procs[child_num++] = &procs[i];
+        procs[proc_iter_index].child_num = child_num;
         procs[i].ppid = INT_MIN;
       }
     }
@@ -82,8 +85,8 @@ process *createTree() {
               procs[proc_iter_index].child_num * sizeof(process *), proc_comp);
       if (procs[proc_iter_index].pid == 1)
         root = &procs[proc_iter_index];
-      parent_pid = procs[proc_iter_index].pid;
       proc_iter_index++;
+      parent_pid = procs[proc_iter_index].pid;
     }
   }
   return root;
@@ -96,23 +99,69 @@ char *add_n_space(char *dest, int n) {
   return end;
 }
 
-void print_node(process *node) {
-  if (is_print_pid)
-    printf("%s(%d)", node->comm, node->pid);
-  else
+int print_node(process *node) {
+  if (is_print_pid) {
+    char message[MESSAGE_MAX_SIZE];
+    sprintf(message, "%s(%d)", node->comm, node->pid);
+    printf("%s", message);
+    return strlen(message);
+  } else {
     printf("%s", node->comm);
+    return strlen(node->comm);
+  }
 }
 
 void print_tree(char *forward, char *forward_end, process *root) {
-  printf("%s", forward);
-  print_node(root);
-  if (root->child_num != 0) {
-    printf("   ");
-    forward_end = add_n_space(forward_end, strlen(root->comm + 3));
+  static int is_print_forward = 0;
+  if (is_print_forward) {
+    char forward_[MESSAGE_MAX_SIZE];
+    strcpy(forward_, forward);
+    forward_[forward_end - forward] = '\0';
+    printf("%s", forward_);
+    is_print_forward = 0;
+  }
+  if (root->child_num == 1) {
+    printf(UTF_H UTF_H UTF_H);
+    int add_space_len = 3 + print_node(root->child_procs[0]);
+    forward_end = add_n_space(forward_end, add_space_len);
     print_tree(forward, forward_end, root->child_procs[0]);
-    for (int i = 1; i < root->child_num; i++) {
-      print_tree(forward, forward_end, root->child_procs[i]);
+  } else if (root->child_num > 1) {
+    printf(UTF_H UTF_HD UTF_H);
+    char *forward_end_child = forward_end + sprintf(forward_end, " " UTF_V " ");
+    int add_space_len = print_node(root->child_procs[0]);
+    forward_end_child = add_n_space(forward_end_child, add_space_len);
+    print_tree(forward, forward_end, root->child_procs[0]);
+
+    for (int i = 1; i < root->child_num - 1; i++) {
+      if (is_print_forward) {
+        char forward_[MESSAGE_MAX_SIZE];
+        strcpy(forward_, forward);
+        forward_[forward_end - forward] = '\0';
+        printf("%s", forward_);
+        is_print_forward = 0;
+      }
+      printf(" " UTF_VR UTF_H);
+      forward_end_child -= add_space_len;
+      add_space_len = print_node(root->child_procs[i]);
+      forward_end_child = add_n_space(forward_end_child, add_space_len);
+      print_tree(forward, forward_end_child, root->child_procs[i]);
     }
+    if (is_print_forward) {
+      char forward_[MESSAGE_MAX_SIZE];
+      strcpy(forward_, forward);
+      forward_[forward_end - forward] = '\0';
+      printf("%s", forward_);
+      is_print_forward = 0;
+    }
+    printf(" " UTF_UR UTF_H);
+    forward_end_child -= add_space_len;
+    add_space_len = print_node(root->child_procs[root->child_num - 1]);
+    forward_end_child = add_n_space(forward_end_child, add_space_len);
+    print_tree(forward, forward_end_child,
+               root->child_procs[root->child_num - 1]);
+  } else {
+    printf("\n");
+    is_print_forward = 1;
   }
 }
 
@@ -123,9 +172,9 @@ int main(int argc, char *argv[]) {
       printf("pstree from os-workbench-2022, version 0.0.1");
       break;
     }
-    if (strcmp(argv[i], "-p") == 0 || strcmp(argv[i], "--show-pids"))
+    if (strcmp(argv[i], "-p") == 0 || strcmp(argv[i], "--show-pids") == 0)
       is_print_pid = 1;
-    if (strcmp(argv[i], "-n") == 0 || strcmp(argv[i], "--numeric-sort"))
+    if (strcmp(argv[i], "-n") == 0 || strcmp(argv[i], "--numeric-sort") == 0)
       is_sort = 1;
   }
   assert(!argv[argc]);
@@ -133,7 +182,9 @@ int main(int argc, char *argv[]) {
   char snd_tree_message[MESSAGE_MAX_SIZE];
   readProcess();
   process *root = createTree();
-  char line_buff[MESSAGE_MAX_SIZE];
-  print_tree(line_buff, line_buff, root);
+  char line_buff[MESSAGE_MAX_SIZE] = {0};
+  int n = print_node(root);
+  char *forward_end = add_n_space(line_buff, n);
+  print_tree(line_buff, forward_end, root);
   return 0;
 }
