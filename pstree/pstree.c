@@ -46,7 +46,7 @@ int proc_comp(const void *a, const void *b) {
 
 int proc_comp_default(const void *a, const void *b)
 {
-  return ((process **)a)[0]->comm[0] >= ((process **)b)[0]->comm[0] ? 1 : 0;
+  return ((process **)a)[0]->comm[1] >= ((process **)b)[0]->comm[1] ? 1 : 0;
 }
 
 void readProcess() {
