@@ -20,14 +20,14 @@
 #define UTF_UR "\342\224\224" /* U+2514, Up and right */
 #define UTF_HD "\342\224\254" /* U+252C, Horizontal and down */
 
-typedef 
+typedef struct process_t process;
 struct process_t {
   int pid;
   char comm[256];
   int ppid;
   process *child_procs[MAX_PROC_CHILDS_NUM];
   int child_num;
-} process;
+};
 
 int is_sort;
 int is_print_pid;
