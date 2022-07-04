@@ -126,7 +126,6 @@ int print_node(process *node) {
 }
 
 void print_tree(char *forward, char *forward_end, process *root) {
-  static int is_print_forward = 0;
   print_forward(forward, forward_end);
   if (root->child_num == 1) {
     printf(UTF_H UTF_H UTF_H);
