@@ -61,7 +61,7 @@ void readProcess() {
     sprintf(path, "%s/%s/stat", PROC_PATH, file->d_name);
     FILE *stat = fopen(path, "r");
     char temp;
-    fscanf(stat, "%d (%s) %c %d", &procs[proc_num].pid, procs[proc_num].comm,
+    fscanf(stat, "%d (%[^)] %c %d", &procs[proc_num].pid, procs[proc_num].comm,
            &temp, &procs[proc_num].ppid);
     proc_num++;
   }
