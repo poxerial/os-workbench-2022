@@ -81,8 +81,8 @@ process *createTree() {
 
     if (is_all_child_linked) {
       if (is_sort)
-        qsort(procs[proc_iter_index].child_procs, sizeof(process *),
-              procs[proc_iter_index].child_num * sizeof(process *), proc_comp);
+        qsort(procs[proc_iter_index].child_procs, procs[proc_iter_index].child_num,
+              sizeof(process *), proc_comp);
       if (procs[proc_iter_index].pid == 1)
         root = &procs[proc_iter_index];
       proc_iter_index++;
