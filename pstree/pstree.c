@@ -10,7 +10,7 @@
 
 #define MAX_PROCS 512
 #define PROC_PATH "/proc"
-#define MAX_PROC_CHILDS_NUM 128 
+#define MAX_PROC_CHILDS_NUM 512 
 #define MAX_PATH_LEN 512
 #define MESSAGE_MAX_SIZE 512
 
