@@ -46,7 +46,7 @@ int proc_comp(const void *a, const void *b) {
 
 int proc_comp_default(const void *a, const void *b)
 {
-  return ((process **)a)[0]->comm[1] >= ((process **)b)[0]->comm[1] ? 1 : 0;
+  return ((process **)a)[0]->comm[0] >= ((process **)b)[0]->comm[0] ? 1 : 0;
 }
 
 void readProcess() {
@@ -61,7 +61,7 @@ void readProcess() {
     sprintf(path, "%s/%s/stat", PROC_PATH, file->d_name);
     FILE *stat = fopen(path, "r");
     char temp;
-    fscanf(stat, "%d %s %c %d", &procs[proc_num].pid, procs[proc_num].comm,
+    fscanf(stat, "%d (%s) %c %d", &procs[proc_num].pid, procs[proc_num].comm,
            &temp, &procs[proc_num].ppid);
     proc_num++;
   }
