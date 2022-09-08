@@ -12,9 +12,9 @@
 #define FUNC 1
 
 #ifdef __x86_64
-#define COMPILE_COMMAND "gcc -w -fPIC -shared m64 -ldl"
+#define COMPILE_COMMAND "gcc -Wno-unused-result -Wno-unused-value -Wno-unused-variable -fPIC -shared m64"
 #else
-#define COMPILE_COMMAND "gcc -w -fPIC -shared m32 -ldl" 
+#define COMPILE_COMMAND "gcc -Wno-unused-result -Wno-unused-value -Wno-unused-variable -fPIC -shared m32" 
 #endif
 
 
@@ -114,7 +114,7 @@ int compile(const char *codes, const char *name)
   fclose(source_code);
 
   char compile_commands[256];
-  sprintf(compile_commands, COMPILE_COMMAND" -o %s %s", name, filename);  
+  sprintf(compile_commands, COMPILE_COMMAND" -o %s %s -ldl", name, filename);  
   char *args[] = {compile_commands, NULL};
 
   int pid = fork();
