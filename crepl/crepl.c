@@ -12,9 +12,9 @@
 #define FUNC 1
 
 #ifdef __x86_64
-#define COMPILE_COMMAND "gcc -Wno-unused-result -Wno-unused-value -Wno-unused-variable -fPIC -shared m64"
+#define COMPILE_COMMAND "gcc -Wno-unused-result -Wno-unused-value -Wno-unused-variable -fPIC -shared -m64"
 #else
-#define COMPILE_COMMAND "gcc -Wno-unused-result -Wno-unused-value -Wno-unused-variable -fPIC -shared m32" 
+#define COMPILE_COMMAND "gcc -Wno-unused-result -Wno-unused-value -Wno-unused-variable -fPIC -shared -m32" 
 #endif
 
 
