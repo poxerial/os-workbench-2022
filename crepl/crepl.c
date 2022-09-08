@@ -12,11 +12,9 @@
 #define FUNC 1
 
 #ifdef __x86_64
-#define COMPILE_COMMAND "gcc -fPIC -shared -m64 -O1 -std=gnu11 -ggdb" \
-" -Wall -Werror -Wno-unused-result -Wno-unused-value -Wno-unused-variable"
+#define MACHINE_OPTION "-m64"
 #else
-#define COMPILE_COMMAND "gcc -fPIC -shared -m64 -O1 -std=gnu11 -ggdb" \
-" -Wall -Werror -Wno-unused-result -Wno-unused-value -Wno-unused-variable" 
+#define MACHINE_OPTION "-m32"
 #endif
 
 
@@ -26,7 +24,7 @@ int check(const char *);
 void gen_name(char *);
 void add_func(const char *);
 void eval_expr(const char *);
-int compile(const char *, const char *);
+int compile(const char *, char *);
 void* load(const char *name);
 int execute(void *);
 
@@ -107,7 +105,7 @@ void eval_expr(const char *line)
   }
 }
 
-int compile(const char *codes, const char *name)
+int compile(const char *codes, char *name)
 {
   char filename[64];
   strcpy(filename, name);
@@ -115,9 +113,9 @@ int compile(const char *codes, const char *name)
   fprintf(source_code, "%s", codes);
   fclose(source_code);
 
-  char compile_commands[256];
-  sprintf(compile_commands, COMPILE_COMMAND" -o %s %s -ldl", name, filename);  
-  char *args[] = {compile_commands, NULL};
+  char * const args[] = {"gcc", "-fPIC", "-shared", MACHINE_OPTION, "-O1",
+   "-std=gnu11", "-ggdb", "-Wall", "-Werror", "-Wno-unused-result",
+    "-Wno-unused-value", "-Wno-unused-variable", "-o", name, filename, "-ldl"};
 
   int pid = fork();
   if (pid == 0)
