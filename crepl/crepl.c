@@ -62,7 +62,7 @@ void gen_name(char *name)
 {
   struct timeval time;
   gettimeofday(&time, NULL);
-  sprintf(name, "%ld_%ld", time.tv_sec, time.tv_usec);
+  sprintf(name, "__%ld_%ld__", time.tv_sec, time.tv_usec);
 }
 
 void add_func(const char *line)
