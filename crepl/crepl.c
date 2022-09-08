@@ -1,3 +1,5 @@
+#define _GNU_SOURCE
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -120,8 +122,8 @@ int compile(const char *codes, char *name)
   int pid = fork();
   if (pid == 0)
   {
-    int error_code = execve("gcc", args, environ);
-    exit(-1);
+    int error_code = execvpe("gcc", args, environ);
+    exit(error_code);
   }
   int wait_status;
   wait(&wait_status);
