@@ -116,7 +116,7 @@ int compile(const char *codes, char *name)
   fclose(source_code);
 
   char * const args[] = {"gcc", "-fPIC", "-shared", MACHINE_OPTION, "-O1",
-   "-std=gnu11", "-ggdb", "-Wall", "-Werror", "-Wno-unused-result",
+   "-std=gnu11", "-ggdb", "-Wno-unused-result",
     "-Wno-unused-value", "-Wno-unused-variable", "-o", name, filename, "-ldl", NULL};
 
   int pid = fork();
