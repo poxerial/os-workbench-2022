@@ -137,6 +137,7 @@ void* load(const char *name)
 
 int execute(void *handle)
 {
-  int (*func)() = (int (*)())handle;
-  return func(); 
+  Dl_info info;   
+  dladdr(handle, &info);
+  return 0;
 }
