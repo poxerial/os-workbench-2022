@@ -28,7 +28,7 @@ void add_func(const char *);
 void eval_expr(const char *);
 int compile(const char *, char *);
 void* load(const char *name);
-int execute(void *);
+int execute(void *, const char*);
 
 
 int main(int argc, char *argv[]) {
@@ -102,7 +102,7 @@ void eval_expr(const char *line)
   else
   {
     void *handle = load(name);
-    int result = execute(handle);
+    int result = execute(handle, name);
     printf("%d\n", result);
   }
 }
@@ -135,10 +135,10 @@ void* load(const char *name)
   return dlopen(name, RTLD_LAZY);
 }
 
-int execute(void *handle)
+int execute(void *handle, const char *name)
 {
   Dl_info info;   
-  dladdr(handle, &info);
-  printf("fname: %s sname: %s\n", info.dli_fname, info.dli_sname);
+  void *addr = dlsym(handle, name); 
+  printf("%lx\n", (unsigned long)addr);
   return 0;
 }
