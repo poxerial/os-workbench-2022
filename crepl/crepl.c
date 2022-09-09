@@ -138,7 +138,6 @@ void* load(const char *name)
 int execute(void *handle, const char *name)
 {
   Dl_info info;   
-  void *addr = dlsym(handle, name); 
-  printf("%lx\n", (unsigned long)addr);
-  return 0;
+  int (*wrapper)() = (int (*)()) dlsym(handle, name); 
+  return wrapper();
 }
