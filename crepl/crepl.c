@@ -147,9 +147,3 @@ int execute(void *handle, const char *name)
   int (*wrapper)() = (int (*)()) dlsym(handle, name); 
   return wrapper();
 }
-
-int hello()
-{
-  printf("Hello!\n");
-  return 0;
-}

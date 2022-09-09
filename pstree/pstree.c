@@ -54,7 +54,6 @@ void read_process() {
   closedir(dir);
 }
 
-
 int proc_comp(const void *a, const void *b) {
   return ((process **)a)[0]->pid >= ((process **)b)[0]->pid ? 1 : 0;
 }
@@ -96,7 +95,6 @@ process *create_tree() {
   }
   return root;
 }
-
 
 char *add_n_space(char *dest, int n) {
   char *end = dest + n;
@@ -161,7 +159,6 @@ void print_tree(char *forward, char *forward_end, process *root) {
     is_print_forward = 1;
   }
 }
-
 
 int main(int argc, char *argv[]) {
   for (int i = 0; i < argc; i++) {
