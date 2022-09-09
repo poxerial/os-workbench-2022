@@ -102,6 +102,11 @@ void eval_expr(const char *line)
   else
   {
     void *handle = load(name);
+    if (handle == NULL)
+    {
+      printf("Invalid symbol!\n");
+      return;
+    }
     int result = execute(handle, name);
     printf("%d\n", result);
   }
@@ -131,7 +136,7 @@ int compile(const char *codes, char *name)
 
 void* load(const char *name)
 {
-  return dlopen(name, RTLD_LAZY);
+  return dlopen(name, RTLD_NOW);
 }
 
 int execute(void *handle, const char *name)
