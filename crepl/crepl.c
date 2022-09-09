@@ -139,7 +139,7 @@ int compile(const char *codes, char *name)
 
 void* load(const char *name)
 {
-  return dlopen(name, RTLD_LAZY | RTLD_GLOBAL);
+  return dlopen(name, RTLD_NOW | RTLD_GLOBAL);
 }
 
 int execute(void *handle, const char *name)
