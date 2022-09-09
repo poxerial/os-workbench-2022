@@ -124,7 +124,7 @@ int compile(const char *codes, char *name)
   fclose(source_code);
 
   char * const args[] = {"gcc", "-fPIC", "-shared", MACHINE_OPTION, "-O1",
-   "-std=gnu11", "-ggdb", "-w", "-o", name, filename, "-ldl", NULL};
+   "-std=gnu11", "-w", "-o", name, filename, "-ldl", NULL};
 
   int pid = fork();
   if (pid == 0)
@@ -146,7 +146,15 @@ int execute(void *handle, const char *name)
 {
   Dl_info info;   
   int (*wrapper)() = (int (*)()) dlsym(handle, name); 
-  return wrapper();
+
+  int pid = fork();
+  if (pid == 0)
+  {
+    exit(wrapper());
+  }
+  int wait_status;
+  wait(&wait_status);
+  return wait_status;
 }
 
 int hello()
