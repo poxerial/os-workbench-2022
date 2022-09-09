@@ -77,8 +77,11 @@ void add_func(const char *line)
   }
   else 
   {
-    load(compile_time_str);
-    printf("Func added.\n");
+    void * handle = load(compile_time_str);
+    if (handle)
+      printf("Func added.\n");
+    else
+      printf("Load func error.\n");
   }
 }
 
