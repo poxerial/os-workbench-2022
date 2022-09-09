@@ -139,5 +139,6 @@ int execute(void *handle)
 {
   Dl_info info;   
   dladdr(handle, &info);
+  printf("fname: %s sname: %s\n", info.dli_fname, info.dli_saddr);
   return 0;
 }
