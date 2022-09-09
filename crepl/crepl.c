@@ -144,17 +144,8 @@ void* load(const char *name)
 
 int execute(void *handle, const char *name)
 {
-  Dl_info info;   
   int (*wrapper)() = (int (*)()) dlsym(handle, name); 
-
-  int pid = fork();
-  if (pid == 0)
-  {
-    exit(wrapper());
-  }
-  int wait_status;
-  wait(&wait_status);
-  return wait_status;
+  return wrapper();
 }
 
 int hello()
