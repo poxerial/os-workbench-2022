@@ -139,7 +139,7 @@ int compile(const char *codes, char *name)
 
 void* load(const char *name)
 {
-  return dlopen(name, RTLD_NOW);
+  return dlopen(name, RTLD_GLOBAL);
 }
 
 int execute(void *handle, const char *name)
@@ -147,4 +147,10 @@ int execute(void *handle, const char *name)
   Dl_info info;   
   int (*wrapper)() = (int (*)()) dlsym(handle, name); 
   return wrapper();
+}
+
+int hello()
+{
+  printf("Hello!\n");
+  return 0;
 }
