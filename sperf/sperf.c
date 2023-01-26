@@ -117,6 +117,7 @@ int main(int argc, char *argv[]) {
         char errbuf[512];
         regerror(errcode, &preg, errbuf, sizeof(errbuf));
         printf("regexec failed: %s.\n", errbuf);
+        exit(errcode);
       }
 
       buffer[matches[1].rm_eo] = '\0';
