@@ -113,16 +113,15 @@ int main(int argc, char *argv[]) {
       *end = '\0';
 
       regmatch_t matches[3];
-      if ((errcode = regexec(&preg, buffer, 3, matches,
-                             REG_EXTENDED))) {
-                              if (errcode == REG_NOMATCH) {
-                                    if (syscs.num > 0) {
-      printf("==================");
-      printf("time: %d s.\n", n++);
-      _print(&syscs);
-    }
-    return 0;
-                              }
+      if ((errcode = regexec(&preg, buffer, 3, matches, REG_EXTENDED))) {
+        if (errcode == REG_NOMATCH) {
+          if (syscs.num > 0) {
+            printf("==================");
+            printf("time: %d s.\n", n++);
+            _print(&syscs);
+          }
+          return 0;
+        }
         char errbuf[512];
         regerror(errcode, &preg, errbuf, sizeof(errbuf));
         printf("regexec failed: %s.\n", errbuf);
