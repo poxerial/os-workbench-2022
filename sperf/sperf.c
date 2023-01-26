@@ -6,7 +6,6 @@
 #include <string.h>
 #include <time.h>
 
-#include <regex.h>
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -14,6 +13,7 @@
 #include <syscall.h>
 #include <unistd.h>
 #include <pthread.h>
+#include <regex.h>
 
 #define BUFFER_SIZE 128
 #define SYSCALL_MAX_NUM 100
