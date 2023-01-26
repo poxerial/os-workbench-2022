@@ -21,10 +21,10 @@ int main(int argc, char *argv[]) {
 
 
   char **exec_argv= (char**)alloca(argc * sizeof(char *));
+  exec_argv[0] = "-r";
   for (int i = 0; i < argc; i++) {
-    exec_argv[i] = argv[i];
+    exec_argv[i + 1] = argv[i];
   }
-  exec_argv[argc] = "-r";
 
   execve("strace",          exec_argv, exec_envp);
   execve("/bin/strace",     exec_argv, exec_envp);
