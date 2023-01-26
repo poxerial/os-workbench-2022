@@ -80,7 +80,6 @@ void set_wait(int pid, int des) {
 }
 
 int main(int argc, char *argv[]) {
-  printf("%d\n", getpid());
   int pipedes[2];
   assert(pipe(pipedes) == 0);
   int pid = fork();
