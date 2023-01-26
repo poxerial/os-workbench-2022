@@ -14,7 +14,7 @@ int main(int argc, char *argv[]) {
   assert(pipe(pipedes) == 0);
   int pid = fork();
   if (pid == 0) {
-    dup2(STDERR_FILENO, pipedes[1]);
+    dup2(pipedes[1], STDERR_FILENO);
 
     char *exec_envp[] = {
         "PATH=/bin",
