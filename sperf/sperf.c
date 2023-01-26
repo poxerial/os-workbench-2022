@@ -65,7 +65,7 @@ void *wait_and_close_pipe(void *args) {
   int pid = ((int *)args)[0], des = ((int *)args)[1];
   waitpid(pid, NULL, 0);
   close(des);
-  printf("close pipe %d\n", des);
+  printf("%d returned and close pipe %d\n", pid, des);
   return NULL;
 }
 
