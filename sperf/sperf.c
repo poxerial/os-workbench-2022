@@ -37,6 +37,7 @@ void new_syscall(syscalls *s, const char *const name, const double time) {
   for (int i = 0; i < s->num; i++) {
     if (0 == strcmp(s->s[i].name, name)) {
       s->s[i].time += time;
+      return;
     }
   }
   if (s->num < SYSCALL_MAX_NUM) {
