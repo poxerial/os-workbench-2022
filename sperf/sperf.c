@@ -113,7 +113,7 @@ int main(int argc, char *argv[]) {
       *end = '\0';
 
       regmatch_t matches[3];
-      if ((errcode = regexec(&preg, buffer, 3, matches, REG_EXTENDED))) {
+      if ((errcode = regexec(&preg, buffer, 3, matches, 0))) {
         if (errcode == REG_NOMATCH) {
           if (syscs.num > 0) {
             printf("==================");
