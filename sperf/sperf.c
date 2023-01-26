@@ -154,6 +154,7 @@ int main(int argc, char *argv[]) {
         if (difftime(now, start) >= 1.0) {
           printf("==================");
           printf("time: %d s.\n", n++);
+          printf("==================");
           _print(&syscs);
           syscs.num = 0;
           start = now;
@@ -170,8 +171,6 @@ int main(int argc, char *argv[]) {
       }
     }
     if (syscs.num > 0) {
-      printf("==================");
-      printf("time: %d s.\n", n++);
       _print(&syscs);
     }
   }
