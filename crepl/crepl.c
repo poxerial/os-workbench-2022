@@ -1,5 +1,35 @@
+#define _GNU_SOURCE
+
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include <time.h>
+
+#include <unistd.h>
+#include <sys/time.h>
+#include <wait.h>
+#include <dlfcn.h>
+
+#define EXPR 0
+#define FUNC 1
+
+#ifdef __x86_64
+#define MACHINE_OPTION "-m64"
+#else
+#define MACHINE_OPTION "-m32"
+#endif
+
+
+extern char **environ;
+
+int check(const char *);
+void gen_name(char *);
+void add_func(const char *);
+void eval_expr(const char *);
+int compile(const char *, char *);
+void* load(const char *name);
+int execute(void *, const char*);
+
 
 int main(int argc, char *argv[]) {
   static char line[4096];
@@ -9,6 +39,111 @@ int main(int argc, char *argv[]) {
     if (!fgets(line, sizeof(line), stdin)) {
       break;
     }
-    printf("Got %zu chars.\n", strlen(line)); // ??
+    if (check(line) == EXPR)
+    {
+      eval_expr(line);
+    }
+    else
+    {
+      add_func(line);
+    }
   }
+}
+
+int check(const char *line)
+{
+  int result;
+  if (strstr(line, "int"))
+    result = FUNC;
+  else
+    result = EXPR;
+  return result;
+}
+
+void gen_name(char *name)
+{
+  struct timeval time;
+  gettimeofday(&time, NULL);
+  sprintf(name, "__%ld_%ld__", time.tv_sec, time.tv_usec);
+}
+
+void add_func(const char *line)
+{
+  char compile_time_str[64];
+  gen_name(compile_time_str);
+  if (compile(line, compile_time_str))
+  {
+    printf("Compile failed.\n");
+  }
+  else 
+  {
+    void * handle = load(compile_time_str);
+    if (handle)
+      printf("Func added.\n");
+    else
+      printf("Load func error.\n");
+  }
+}
+
+void eval_expr(const char *line)
+{
+  char *wrapper_content = (char *)malloc(strlen(line) + 128);
+  char name[64];
+  gen_name(name);
+  strcat(name, "wrapper");
+  sprintf(wrapper_content, 
+  "int %s()"
+  "{"
+  "  return %s;"
+  "}",
+  name, line);
+
+  if (compile(wrapper_content, name))
+  {
+    printf("Compile failed!\n");
+  }
+  else
+  {
+    void *handle = load(name);
+    if (handle == NULL)
+    {
+      printf("Invalid symbol!\n");
+      return;
+    }
+    int result = execute(handle, name);
+    printf("%d\n", result);
+  }
+}
+
+int compile(const char *codes, char *name)
+{
+  char filename[64];
+  strcpy(filename, name);
+  FILE *source_code = fopen(strcat(filename, ".c"), "w");
+  fprintf(source_code, "%s", codes);
+  fclose(source_code);
+
+  char * const args[] = {"gcc", "-fPIC", "-shared", MACHINE_OPTION, "-O1",
+   "-std=gnu11", "-w", "-o", name, filename, "-ldl", NULL};
+
+  int pid = fork();
+  if (pid == 0)
+  {
+    int error_code = execvpe("gcc", args, environ);
+    exit(error_code);
+  }
+  int wait_status;
+  wait(&wait_status);
+  return wait_status; 
+}
+
+void* load(const char *name)
+{
+  return dlopen(name, RTLD_NOW | RTLD_GLOBAL);
+}
+
+int execute(void *handle, const char *name)
+{
+  int (*wrapper)() = (int (*)()) dlsym(handle, name); 
+  return wrapper();
 }
