@@ -60,6 +60,8 @@ int main(int argc, char *argv[]) {
   assert(pipe(pipedes) == 0);
   int pid = fork();
   if (pid == 0) {
+    
+
     dup2(pipedes[1], STDERR_FILENO);
 
     char *exec_envp[] = {
@@ -89,7 +91,7 @@ int main(int argc, char *argv[]) {
     time(&start);
 
     regex_t preg;
-    assert(regcomp(&preg, regex, REG_EXTENDED));
+    assert(regcomp(&preg, regex, REG_EXTENDED) == 0);
 
     int size;
     while ((size = read(pipedes[0], buffer + buffer_offset,
