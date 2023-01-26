@@ -12,7 +12,7 @@ int main(int argc, char *argv[]) {
   };
   char **exec_argv = (char **)alloca((argc + 2) * sizeof(char *));
   exec_argv[0] = "strace";
-  exec_argv[1] = "-r";
+  exec_argv[1] = "-T";
   for (int i = 1; i < argc; i++) {
     exec_argv[i + 1] = argv[i];
   }
