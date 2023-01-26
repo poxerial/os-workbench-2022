@@ -58,8 +58,6 @@ void _print(syscalls *s) {
 }
 
 int main(int argc, char *argv[]) {
-  printf("start\n");
-
   int pipedes[2];
   assert(pipe(pipedes) == 0);
   int pid = fork();
@@ -84,6 +82,7 @@ int main(int argc, char *argv[]) {
     perror(argv[0]);
     exit(EXIT_FAILURE);
   } else {
+    printf("pid: %d\n", pid);
     int n = 0;
 
     char buffer[BUFFER_SIZE] = {0};
