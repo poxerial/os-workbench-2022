@@ -58,6 +58,7 @@ void _print(syscalls *s) {
 }
 
 int main(int argc, char *argv[]) {
+  printf("start\n");
 
   int pipedes[2];
   assert(pipe(pipedes) == 0);
@@ -100,6 +101,7 @@ int main(int argc, char *argv[]) {
     int size;
     while ((size = read(pipedes[0], buffer + buffer_offset,
                         BUFFER_SIZE - buffer_offset))) {
+      printf("[debug] buffer: %s", buffer);
       char *end;
       if ((end = strchr(buffer, '\n')) == NULL) {
         buffer_offset += size;
