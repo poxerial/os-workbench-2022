@@ -1,12 +1,58 @@
 #include <assert.h>
-#include <bits/types/time_t.h>
-#include <regex.h>
+#include <bits/types/timer_t.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <time.h>
 
+#include <regex.h>
+
+#include <syscall.h>
 #include <unistd.h>
 
 #define BUFFER_SIZE 128
+#define SYSCALL_MAX_NUM 100
+#define SYSCALL_NAME_SIZE 16
+
+#define ARRAY_SIZE(ARRAY) (sizeof(ARRAY) / sizeof(ARRAY[0]))
+
+typedef struct {
+  char name[SYSCALL_NAME_SIZE];
+  double time;
+} _syscall;
+
+typedef struct {
+  int num;
+
+  _syscall s[SYSCALL_MAX_NUM];
+} syscalls;
+
+static const char regex[] = "^(\\w+)\(.*<(\\d+\\.\\d+)>$";
+static syscalls syscs;
+
+void new_syscall(syscalls *s, const char *const name, const double time) {
+  for (int i = 0; i < s->num; i++) {
+    if (0 == strcmp(s->s[i].name, name)) {
+      s->s[i].time += time;
+    }
+  }
+  if (s->num < SYSCALL_MAX_NUM) {
+    assert(strlen(name) <= SYSCALL_NAME_SIZE);
+    strcpy(s->s[s->num].name, name);
+    s->s[s->num].time = time;
+  }
+}
+
+int _syscall_cmp(const void *a, const void *b) {
+  return -((const _syscall *)a)->time + ((const _syscall *)b)->time;
+}
+
+void _print(syscalls *s) {
+  qsort(s->s, s->num, sizeof(_syscall), _syscall_cmp);
+  for (int i = 0; i < s->num; i++) {
+    printf("%s %lf\n", s->s[i].name, s->s[i].time);
+  }
+}
 
 int main(int argc, char *argv[]) {
 
@@ -34,10 +80,54 @@ int main(int argc, char *argv[]) {
     perror(argv[0]);
     exit(EXIT_FAILURE);
   } else {
-    char buffer[BUFFER_SIZE] = {0};
+    int n = 0;
 
-    while (read(pipedes[0], buffer, BUFFER_SIZE) != 0) {
-      printf("%s", buffer);
+    char buffer[BUFFER_SIZE] = {0};
+    size_t buffer_offset = 0;
+
+    time_t start;
+    time(&start);
+
+    regex_t preg;
+    assert(regcomp(&preg, regex, REG_EXTENDED));
+
+    int size;
+    while ((size = read(pipedes[0], buffer + buffer_offset,
+                        BUFFER_SIZE - buffer_offset))) {
+      char *end;
+      if ((end = strchr(buffer, '\n')) == NULL) {
+        buffer_offset += size;
+        continue;
+      }
+
+      *end = '\0';
+
+      regmatch_t matches[3];
+      assert(0 == regexec(&preg, buffer, ARRAY_SIZE(matches), matches,
+                          REG_EXTENDED));
+
+      buffer[matches[1].rm_eo] = '\0';
+      buffer[matches[2].rm_eo] = '\0';
+
+      new_syscall(&syscs, buffer + matches[1].rm_so,
+                  atof(buffer + matches[2].rm_so));
+
+      time_t now;
+      time(&now);
+      if (difftime(now, start) >= 1.0) {
+        printf("==================");
+        printf("time: %d s.\n", n++);
+        _print(&syscs);
+        syscs.num = 0;
+        start = now;
+      }
+      
+       if (end - buffer + 1 != buffer_offset + size) {
+          char tmp[BUFFER_SIZE];
+          strcpy(tmp, end + 1);
+          strcpy(buffer, tmp);
+          buffer_offset = strlen(buffer);
+        }
     }
   }
 }
