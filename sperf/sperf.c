@@ -113,7 +113,7 @@ int main(int argc, char *argv[]) {
       *end = '\0';
 
       regmatch_t matches[3];
-      if ((errcode = regexec(&preg, buffer, ARRAY_SIZE(matches), matches,
+      if ((errcode = regexec(&preg, buffer, 3, matches,
                              REG_EXTENDED)) &&
           errcode != REG_NOMATCH) {
         char errbuf[512];
