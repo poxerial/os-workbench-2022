@@ -85,7 +85,7 @@ int main(int argc, char *argv[]) {
     perror(argv[0]);
     exit(EXIT_FAILURE);
   } else {
-    printf("pid: %d\n", pid);
+    printf("pid: %d\n", getpid());
     int n = 0;
 
     char buffer[BUFFER_SIZE] = {0};
