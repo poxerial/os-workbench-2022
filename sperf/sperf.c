@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <bits/pthreadtypes.h>
 #include <bits/types/timer_t.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -6,12 +7,13 @@
 #include <time.h>
 
 #include <regex.h>
-
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 #include <syscall.h>
 #include <unistd.h>
+#include <pthread.h>
 
 #define BUFFER_SIZE 128
 #define SYSCALL_MAX_NUM 100
@@ -59,6 +61,23 @@ void _print(syscalls *s) {
   }
 }
 
+void *wait_and_close_pipe(void *args) {
+  int pid = ((int *)args)[0], des = ((int *)args)[1];
+  waitpid(pid, NULL, 0);
+  close(des);
+  return NULL;
+}
+
+void set_wait(int pid, int des) {
+  int args[2];
+  args[0] = pid;
+  args[1] = des;
+  pthread_t id;
+  pthread_attr_t attr;
+  assert(pthread_attr_init(&attr) == 0);
+  pthread_create(&id, &attr, wait_and_close_pipe, args);
+}
+
 int main(int argc, char *argv[]) {
   int pipedes[2];
   assert(pipe(pipedes) == 0);
@@ -87,7 +106,8 @@ int main(int argc, char *argv[]) {
     perror(argv[0]);
     exit(EXIT_FAILURE);
   } else {
-    printf("pid: %d\n", getpid());
+    set_wait(pid, pipedes[1]);
+
     int n = 0;
 
     char buffer[BUFFER_SIZE] = {0};
