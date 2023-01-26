@@ -20,11 +20,11 @@ int main(int argc, char *argv[]) {
   char *exec_envp[] = { "PATH=/bin", NULL, };
 
 
-  char **exec_argv= (char**)alloca((argc + 2) * sizeof(char *));
+  char **exec_argv= (char**)alloca((argc + 1) * sizeof(char *));
   exec_argv[0] = "strace";
   exec_argv[1] = "-r";
-  for (int i = 0; i < argc; i++) {
-    exec_argv[i + 2] = argv[i];
+  for (int i = 1; i < argc; i++) {
+    exec_argv[i + 1] = argv[i];
   }
 
   execve("strace",          exec_argv, exec_envp);
