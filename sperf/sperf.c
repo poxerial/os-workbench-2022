@@ -100,7 +100,7 @@ int main(int argc, char *argv[]) {
     if ((errcode = regcomp(&preg, regex, REG_EXTENDED) != 0)) {
       char errbuf[512];
       regerror(errcode, &preg, errbuf, sizeof(errbuf));
-      printf("%s", errbuf);
+      printf("regcomp failed: %s\n", errbuf);
       exit(errcode);
     }
 
