@@ -7,11 +7,11 @@
 
 #include <regex.h>
 
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <syscall.h>
 #include <unistd.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
 
 #define BUFFER_SIZE 128
 #define SYSCALL_MAX_NUM 100
@@ -65,7 +65,7 @@ int main(int argc, char *argv[]) {
   if (pid == 0) {
 
     int null_des = open("/dev/null", O_WRONLY);
-    
+
     dup2(null_des, STDOUT_FILENO);
     dup2(pipedes[1], STDERR_FILENO);
 
@@ -97,11 +97,9 @@ int main(int argc, char *argv[]) {
 
     regex_t preg;
     int errcode;
-    if((errcode = regcomp(&preg, regex, REG_EXTENDED))) {
+    if ((errcode = regcomp(&preg, regex, REG_EXTENDED))) {
       exit(errcode);
     }
-    
-    
 
     int size;
     while ((size = read(pipedes[0], buffer + buffer_offset,
@@ -115,8 +113,11 @@ int main(int argc, char *argv[]) {
       *end = '\0';
 
       regmatch_t matches[3];
-      assert(0 == regexec(&preg, buffer, ARRAY_SIZE(matches), matches,
-                          REG_EXTENDED));
+      if ((errcode = regexec(&preg, buffer, ARRAY_SIZE(matches), matches, REG_EXTENDED))) {
+        char errbuf[512];
+        regerror(errcode, &preg, errbuf, sizeof(errbuf));
+        printf("regexec failed: %s.\n", errbuf);
+      }
 
       buffer[matches[1].rm_eo] = '\0';
       buffer[matches[2].rm_eo] = '\0';
@@ -133,13 +134,13 @@ int main(int argc, char *argv[]) {
         syscs.num = 0;
         start = now;
       }
-      
-       if (end - buffer + 1 != buffer_offset + size) {
-          char tmp[BUFFER_SIZE];
-          strcpy(tmp, end + 1);
-          strcpy(buffer, tmp);
-          buffer_offset = strlen(buffer);
-        }
+
+      if (end - buffer + 1 != buffer_offset + size) {
+        char tmp[BUFFER_SIZE];
+        strcpy(tmp, end + 1);
+        strcpy(buffer, tmp);
+        buffer_offset = strlen(buffer);
+      }
     }
   }
 }
