@@ -113,27 +113,30 @@ int main(int argc, char *argv[]) {
       *end = '\0';
 
       regmatch_t matches[3];
-      if ((errcode = regexec(&preg, buffer, ARRAY_SIZE(matches), matches, REG_EXTENDED))) {
+      if ((errcode = regexec(&preg, buffer, ARRAY_SIZE(matches), matches,
+                             REG_EXTENDED)) &&
+          errcode != REG_NOMATCH) {
         char errbuf[512];
         regerror(errcode, &preg, errbuf, sizeof(errbuf));
         printf("regexec failed: %s.\n", errbuf);
         exit(errcode);
-      }
+      } else {
 
-      buffer[matches[1].rm_eo] = '\0';
-      buffer[matches[2].rm_eo] = '\0';
+        buffer[matches[1].rm_eo] = '\0';
+        buffer[matches[2].rm_eo] = '\0';
 
-      new_syscall(&syscs, buffer + matches[1].rm_so,
-                  atof(buffer + matches[2].rm_so));
+        new_syscall(&syscs, buffer + matches[1].rm_so,
+                    atof(buffer + matches[2].rm_so));
 
-      time_t now;
-      time(&now);
-      if (difftime(now, start) >= 1.0) {
-        printf("==================");
-        printf("time: %d s.\n", n++);
-        _print(&syscs);
-        syscs.num = 0;
-        start = now;
+        time_t now;
+        time(&now);
+        if (difftime(now, start) >= 1.0) {
+          printf("==================");
+          printf("time: %d s.\n", n++);
+          _print(&syscs);
+          syscs.num = 0;
+          start = now;
+        }
       }
 
       if (end - buffer + 1 != buffer_offset + size) {
@@ -142,6 +145,11 @@ int main(int argc, char *argv[]) {
         strcpy(buffer, tmp);
         buffer_offset = strlen(buffer);
       }
+    }
+    if (syscs.num > 0) {
+      printf("==================");
+      printf("time: %d s.\n", n++);
+      _print(&syscs);
     }
   }
 }
