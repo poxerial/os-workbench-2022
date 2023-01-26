@@ -30,7 +30,7 @@ typedef struct {
   _syscall s[SYSCALL_MAX_NUM];
 } syscalls;
 
-static const char regex[] = "^(\\w+)\\(.*<(\\d+\\.\\d+)>$";
+static const char regex[] = "^(\\w+).*<(\\d+\\.\\d+)>$";
 static syscalls syscs;
 
 void new_syscall(syscalls *s, const char *const name, const double time) {
