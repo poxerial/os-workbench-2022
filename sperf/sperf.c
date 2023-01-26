@@ -154,8 +154,8 @@ int main(int argc, char *argv[]) {
         time(&now);
         if (difftime(now, start) >= 1.0) {
           printf("==================");
-          printf("time: %d s.\n", n++);
-          printf("==================");
+          printf("time: %d s.", n++);
+          printf("==================\n");
           _print(&syscs);
           syscs.num = 0;
           start = now;
