@@ -9,6 +9,9 @@
 
 #include <syscall.h>
 #include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 #define BUFFER_SIZE 128
 #define SYSCALL_MAX_NUM 100
@@ -60,8 +63,10 @@ int main(int argc, char *argv[]) {
   assert(pipe(pipedes) == 0);
   int pid = fork();
   if (pid == 0) {
-    
 
+    int null_des = open("/dev/null", O_WRONLY);
+    
+    dup2(null_des, STDOUT_FILENO);
     dup2(pipedes[1], STDERR_FILENO);
 
     char *exec_envp[] = {
