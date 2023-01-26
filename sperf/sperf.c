@@ -96,7 +96,11 @@ int main(int argc, char *argv[]) {
     time(&start);
 
     regex_t preg;
-    assert(0 == regcomp(&preg, regex, REG_EXTENDED)); 
+    int errcode;
+    if((errcode = regcomp(&preg, regex, REG_EXTENDED))) {
+      exit(errcode);
+    }
+    
     
 
     int size;
