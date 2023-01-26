@@ -101,7 +101,6 @@ int main(int argc, char *argv[]) {
     int size;
     while ((size = read(pipedes[0], buffer + buffer_offset,
                         BUFFER_SIZE - buffer_offset))) {
-      printf("[debug] buffer: %s", buffer);
       char *end;
       if ((end = strchr(buffer, '\n')) == NULL) {
         buffer_offset += size;
@@ -142,6 +141,8 @@ int main(int argc, char *argv[]) {
         strcpy(tmp, end + 1);
         strcpy(buffer, tmp);
         buffer_offset = strlen(buffer);
+      } else {
+        buffer_offset = 0;
       }
     }
     if (syscs.num > 0) {
