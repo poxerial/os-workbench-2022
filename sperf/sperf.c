@@ -30,7 +30,7 @@ typedef struct {
   _syscall s[SYSCALL_MAX_NUM];
 } syscalls;
 
-static const char regex[] = "^(\\w+)\(.*<(\\d+\\.\\d+)>$";
+static const char regex[] = "^(\\w+)\\(.*<(\\d+\\.\\d+)>$";
 static syscalls syscs;
 
 void new_syscall(syscalls *s, const char *const name, const double time) {
@@ -96,13 +96,8 @@ int main(int argc, char *argv[]) {
     time(&start);
 
     regex_t preg;
-    int errcode;
-    if ((errcode = regcomp(&preg, regex, REG_EXTENDED) != 0)) {
-      char errbuf[512];
-      regerror(errcode, &preg, errbuf, sizeof(errbuf));
-      printf("regcomp failed: %s\n", errbuf);
-      exit(errcode);
-    }
+    assert(0 == regcomp(&preg, regex, REG_EXTENDED)); 
+    
 
     int size;
     while ((size = read(pipedes[0], buffer + buffer_offset,
