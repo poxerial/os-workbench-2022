@@ -66,13 +66,10 @@ void *wait_and_close_pipe(void *args) {
   waitpid(pid, NULL, 0);
   close(des);
   free(args);
-  printf("%d returned and close pipe %d\n", pid, des);
   return NULL;
 }
 
 void set_wait(int pid, int des) {
-  printf("pid: %d, des: %d\n", pid, des);
-
   int *args = malloc(sizeof(int) * 2);
   args[0] = pid;
   args[1] = des;
