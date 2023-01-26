@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#define BUFFER_SIZE 128
+
 int main(int argc, char *argv[]) {
 
   char *exec_envp[] = {
@@ -24,14 +26,20 @@ int main(int argc, char *argv[]) {
   perror(argv[0]);
   exit(EXIT_FAILURE);
 
-  // int pipedes[2];
-  // assert(pipe(pipedes) == 0);
-  // int pid = fork();
-  // if (pid == 0) {
-  //   execve("strace", exec_argv, exec_envp);
-  //   execve("/bin/strace", exec_argv, exec_envp);
-  //   execve("/usr/bin/strace", exec_argv, exec_envp);
-  //   perror(argv[0]);
-  //   exit(EXIT_FAILURE);
-  // }
+  int pipedes[2];
+  assert(pipe(pipedes) == 0);
+  int pid = fork();
+  if (pid == 0) {
+    dup2(STDERR_FILENO, pipedes[1]);
+    execve("strace", exec_argv, exec_envp);
+    execve("/bin/strace", exec_argv, exec_envp);
+    execve("/usr/bin/strace", exec_argv, exec_envp);
+    perror(argv[0]);
+    exit(EXIT_FAILURE);
+  } else {
+    char buffer[BUFFER_SIZE] = {0}; 
+    while (read(pipedes[0], buffer, BUFFER_SIZE) != 0) {
+      printf("%s", buffer);
+    }
+  }
 }
