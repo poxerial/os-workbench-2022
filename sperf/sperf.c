@@ -91,7 +91,13 @@ int main(int argc, char *argv[]) {
     time(&start);
 
     regex_t preg;
-    assert(regcomp(&preg, regex, REG_EXTENDED) == 0);
+    int errcode;
+    if ((errcode = regcomp(&preg, regex, REG_EXTENDED) != 0)) {
+      char errbuf[512];
+      regerror(errcode, &preg, errbuf, sizeof(errbuf));
+      printf("%s", errbuf);
+      exit(errcode);
+    }
 
     int size;
     while ((size = read(pipedes[0], buffer + buffer_offset,
