@@ -48,7 +48,7 @@ void new_syscall(syscalls *s, const char *const name, const double time) {
 }
 
 int _syscall_cmp(const void *a, const void *b) {
-  return -((const _syscall *)a)->time + ((const _syscall *)b)->time;
+  return ((const _syscall *)a)->time < ((const _syscall *)b)->time;
 }
 
 void _print(syscalls *s) {
