@@ -43,6 +43,7 @@ void new_syscall(syscalls *s, const char *const name, const double time) {
     assert(strlen(name) <= SYSCALL_NAME_SIZE);
     strcpy(s->s[s->num].name, name);
     s->s[s->num].time = time;
+    s->num++;
   }
 }
 
