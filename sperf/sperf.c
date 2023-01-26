@@ -70,6 +70,7 @@ void *wait_and_close_pipe(void *args) {
 }
 
 void set_wait(int pid, int des) {
+  printf("pid: %d, des: %d\n", pid, des);
   int args[2];
   args[0] = pid;
   args[1] = des;
