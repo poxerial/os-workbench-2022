@@ -22,7 +22,7 @@ int main(int argc, char *argv[]) {
 
   char **exec_argv= (char**)alloca((argc + 2) * sizeof(char *));
   exec_argv[0] = "strace";
-  exec_argv[1] = "=r";
+  exec_argv[1] = "-r";
   for (int i = 0; i < argc; i++) {
     exec_argv[i + 2] = argv[i];
   }
